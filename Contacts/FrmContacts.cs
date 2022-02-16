@@ -189,14 +189,30 @@ namespace Contacts
         /// <param name="e"></param>
         private void BtnAjouter_Click(object sender, EventArgs e)
         {
-            // vérifier que le nom, prénom et tel ne sont pas vides 
-            if (!txtNom.Text.Equals("") && !txtTel.Text.Equals("") && !txtPrenom.Text.Equals(""))
+            // vérifier que le nom, tel ne sont pas vides 
+            if (!txtNom.Text.Equals("") && !txtTel.Text.Equals(""))
             {
-                // créer le contact et l'ajouter dans la collection
-                Contact nouveauContact = new Contact(txtNom.Text, txtPrenom.Text, txtTel.Text, imgPhoto.Image);
-                lesContacts.Add(nouveauContact);
-                // mettre à jour de la ListBox
-                MajListBox(nouveauContact.ToString());
+                //vérifier si le contact est particulier
+                if(rbtPro.Checked)
+                {
+                    // créer le contact et l'ajouter dans la collection
+                    Professionnel nouveauContact = new Professionnel(txtNom.Text, txtTel.Text, imgPhoto.Image);
+                    lesContacts.Add(nouveauContact);
+                    // mettre à jour de la ListBox
+                    MajListBox(nouveauContact.ToString());
+                }
+                else
+                {
+                    //vérifier si le prénom n'est pas vide
+                    if(!txtPrenom.Text.Equals(""))
+                    {
+                        // créer le contact et l'ajouter dans la collection
+                        Particulier nouveauContact = new Particulier(txtNom.Text, txtPrenom.Text, txtTel.Text, imgPhoto.Image);
+                        lesContacts.Add(nouveauContact);
+                        // mettre à jour de la ListBox
+                        MajListBox(nouveauContact.ToString());
+                    }
+                }
                 // gérer la fin de l'ajout au niveau des objets graphiques
                 FinAjout();
             }
@@ -225,7 +241,16 @@ namespace Contacts
                 SupprContact(index);
                 // remplir les zones d'ajout avec les informations du contact
                 txtNom.Text = leContact.getNom();
-                txtPrenom.Text = leContact.getPrenom();
+                bool typeParticulier = leContact is Particulier;
+                lblPrenom.Visible = typeParticulier;
+                txtPrenom.Visible = typeParticulier;
+                rbtParticulier.Checked = typeParticulier;
+                rbtPro.Checked = !typeParticulier;
+                if (typeParticulier)
+                {
+                    txtPrenom.Text = ((Particulier)leContact).getPrenom();
+                }
+
                 txtTel.Text = leContact.getTel();
                 // gérer le début de l'ajout au niveau des objets graphiques
                 DebutAjout();
@@ -244,6 +269,7 @@ namespace Contacts
         {
             // préparer les composants graphiques comme pour la fin d'un ajout
             FinAjout();
+            rbtParticulier.Checked = true;
             // récupérer la sauvegarde des contacts, si elle existe
             Object recupContacts = Serialise.Recup(fichier);
             if (recupContacts != null)
@@ -321,6 +347,19 @@ namespace Contacts
         private void btnNouveauContact_Click(object sender, EventArgs e)
         {
             DebutAjout();
+        }
+
+        /// <summary>
+        /// Evenement Click sur le bouton rbtParticulier ou Professionnel
+        /// Rend visible ou  non la case "prenom"
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void rbtParticulier_CheckedChanged(object sender, EventArgs e)
+        {
+            lblPrenom.Visible = rbtParticulier.Checked;
+            txtPrenom.Visible = rbtParticulier.Checked;
+
         }
     }
 }
